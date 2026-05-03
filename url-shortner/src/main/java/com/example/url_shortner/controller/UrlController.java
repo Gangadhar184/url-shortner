@@ -1,5 +1,6 @@
 package com.example.url_shortner.controller;
 
+import com.example.url_shortner.dto.ShortenResponse;
 import com.example.url_shortner.service.UrlService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +15,9 @@ public class UrlController {
         this.urlService = urlService;
     }
     @PostMapping("/shorten")
-    public String shorten(@RequestBody String url) {
-        String shortKey = urlService.shortenUrl(url);
-        return "http://localhost:8080/" + shortKey;
+    public ResponseEntity<ShortenResponse> shorten(@RequestBody String url) {
+        String key = urlService.shortenUrl(url);
+        return ResponseEntity.ok(new ShortenResponse("http://localhost:8080/" + key));
     }
     @GetMapping("/{shortKey}")
     public ResponseEntity<Void> redirect(@PathVariable String shortKey) {
