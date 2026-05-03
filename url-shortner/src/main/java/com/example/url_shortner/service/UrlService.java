@@ -4,7 +4,9 @@ import com.example.url_shortner.model.UrlMapping;
 import com.example.url_shortner.repository.UrlRepository;
 import com.example.url_shortner.util.Base62Encoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.time.Instant;
 
 @Service
@@ -13,7 +15,9 @@ public class UrlService {
     public UrlService(UrlRepository urlRepository) {
         this.urlRepository = urlRepository;
     }
+    @Transactional
     public String shortenUrl(String originalUrl) {
+        validateUrl(originalUrl);
         UrlMapping model = new UrlMapping();
         model.setOriginalUrl(originalUrl);
         model.setCreatedAt(Instant.now());
@@ -24,9 +28,21 @@ public class UrlService {
         return shortKey;
     }
     public String getOriginalUrl(String shortKey) {
-        UrlMapping mapping = urlRepository.findByShortKey(shortKey)
-                .orElseThrow(() -> new RuntimeException("URL not found"));
+        return urlRepository
+                .findValidOriginalUrl(shortKey)
+                .orElseThrow(() -> new RuntimeException("URL not found or expired"));
+    }
 
-        return mapping.getOriginalUrl();
+    private void validateUrl(String url) {
+        try {
+            URI uri = new URI(url);
+            if (!("http".equalsIgnoreCase(uri.getScheme()) ||
+                    "https".equalsIgnoreCase(uri.getScheme())
+                    )) {
+                throw new RuntimeException("Invalid URL");
+            }
+        }catch (Exception e){
+            throw new RuntimeException("Invalid URL");
+        }
     }
 }
