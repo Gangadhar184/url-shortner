@@ -3,6 +3,7 @@ package com.example.url_shortner.service;
 import com.example.url_shortner.model.UrlMapping;
 import com.example.url_shortner.repository.UrlRepository;
 import com.example.url_shortner.util.Base62Encoder;
+import com.example.url_shortner.util.SnowflakeIdGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,19 +13,29 @@ import java.time.Instant;
 @Service
 public class UrlService {
     private final UrlRepository urlRepository;
-    public UrlService(UrlRepository urlRepository) {
+    private final SnowflakeIdGenerator idGenerator;
+    public UrlService(UrlRepository urlRepository, SnowflakeIdGenerator idGenerator) {
         this.urlRepository = urlRepository;
+        this.idGenerator = idGenerator;
     }
     @Transactional
     public String shortenUrl(String originalUrl) {
         validateUrl(originalUrl);
-        UrlMapping model = new UrlMapping();
+//        UrlMapping model = new UrlMapping();
+//        model.setOriginalUrl(originalUrl);
+//        model.setCreatedAt(Instant.now());
+//        model = urlRepository.save(model);
+//        String shortKey = Base62Encoder.encode(model.getId());
+//        model.setShortKey(shortKey);
+//        urlRepository.save(model);
+//        return shortKey;
+        long id = idGenerator.nextId();//no db call
+        String shortKey = Base62Encoder.encode(id);
+        UrlMapping model = new  UrlMapping();
+        model.setShortKey(shortKey);
         model.setOriginalUrl(originalUrl);
         model.setCreatedAt(Instant.now());
-        model = urlRepository.save(model);
-        String shortKey = Base62Encoder.encode(model.getId());
-        model.setShortKey(shortKey);
-        urlRepository.save(model);
+        urlRepository.save(model); //now single write
         return shortKey;
     }
     public String getOriginalUrl(String shortKey) {
