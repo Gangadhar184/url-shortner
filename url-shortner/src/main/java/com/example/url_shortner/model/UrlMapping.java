@@ -5,13 +5,17 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "url_mapping")
+@Table(name = "url_mapping",
+        indexes = {
+        @Index(name = "idx_short_key", columnList = "shortKey")
+        }
+)
 public class UrlMapping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false, length = 10)
     private String shortKey;
 
     @Column(nullable = false, length = 2000)

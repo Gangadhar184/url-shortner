@@ -17,7 +17,7 @@ public interface UrlRepository extends JpaRepository<UrlMapping, Long> {
     @Query("""
             SELECT u.originalUrl
             FROM UrlMapping u
-            WHERE u.shorKey = :shortKey
+            WHERE u.shortKey = :shortKey
 """)
     Optional<String> findOriginalUrlByShortKey(@Param("shortKey")String shortKey);
 
